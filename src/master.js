@@ -66,7 +66,7 @@ export class ModbusMaster {
 
                 if (retry <= 0) {
                     // throw new ModbusRetryLimitExceed(funcId);
-                    return
+                    return resolve();
                 }
 
                 this.logger.info(funcName + 'perform request.' + funcId);
@@ -82,6 +82,7 @@ export class ModbusMaster {
                     });
             });
         };
+
         return performRequest(retryCount);
     }
 
