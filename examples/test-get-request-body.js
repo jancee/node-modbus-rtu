@@ -19,7 +19,7 @@ async function getDtuRequest() {
     let result;
     let master = new ModbusMaster({
         requestBodyCb: (body) => {
-            console.log(body);
+            // console.log(body);
             result = body;
         },
         setOnDataListener: function (cb) {
@@ -31,13 +31,13 @@ async function getDtuRequest() {
     });
     master.writeSingleRegister(1, 40001, 15789);
     await sleep(0);
-    console.log(result);
+    // console.log(result);
     master = undefined;
     return result;
 }
 
 async function run() {
-    for (let i = 0; i < 100000; i++) {
+    for (let i = 0; i < 10000000; i++) {
         await getDtuRequest();
     }
 
