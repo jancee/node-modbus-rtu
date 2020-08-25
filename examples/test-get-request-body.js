@@ -29,9 +29,9 @@ async function getDtuRequest() {
 
         },
     });
-    master.writeSingleRegister(1, 40001, 15789);
+    master.writeMultipleRegisters(1, 40001, [15789]);
     await sleep(0);
-    // console.log(result);
+    console.log(result);
     master = undefined;
     return result;
 }
