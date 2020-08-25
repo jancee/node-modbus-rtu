@@ -5,23 +5,23 @@ import { Logger } from './logger';
 
 export class SerialHelperFactory {
     /**
-     * @param {SerialPort} serialPort
+     * @param {function} bodyCb
      * @param options
      * @returns {SerialHelper}
      */
-    static create(serialPort, options) {
+    static create(bodyCb, options) {
         const queue = new Queue(options.queueTimeout);
-        return new SerialHelper(serialPort, queue, options);
+        return new SerialHelper(bodyCb, queue, options);
     }
 }
 
 export class SerialHelper {
     /**
-     * @param {SerialPort} serialPort
+     * @param {function} bodyCb
      * @param {Queue<Task>} queue
      * @param options
      */
-    constructor(serialPort, queue, options) {
+    constructor(bodyCb, queue, options) {
         /**
          * @type {Queue<Task>}
          * @private
@@ -33,7 +33,7 @@ export class SerialHelper {
          * @private
          */
         this.options = options;
-        this.serialPort = serialPort;
+        this.serialPort = bodyCb;
         this.logger = new Logger(options);
 
         this.bindToSerialPort();
@@ -55,9 +55,7 @@ export class SerialHelper {
      * @private
      */
     bindToSerialPort() {
-        this.serialPort.on('open', () => {
-            this.queue.start();
-        });
+        this.queue.start();
     }
 
     /**
@@ -68,11 +66,8 @@ export class SerialHelper {
      */
     handleTask(task, done) {
         this.logger.info('write ' + task.payload.toString('HEX'));
-        this.serialPort.write(task.payload, (error) => {
-            if (error) {
-                task.reject(error);
-            }
-        });
+
+        this.serialPort.requestBodyCb(task.payload);
 
         // set execution timeout for task
         setTimeout(() => {
@@ -86,10 +81,10 @@ export class SerialHelper {
             });
         };
 
-        this.serialPort.on('data', onData);
+        this.serialPort.setOnDataListener(onData);
 
         task.promise.catch(() => {}).finally(() => {
-            this.serialPort.removeListener('data', onData);
+            this.serialPort.removeOnDataListener(onData);
             done();
         });
     }

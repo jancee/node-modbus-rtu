@@ -14,18 +14,14 @@ import { ModbusRetryLimitExceed, ModbusCrcError } from './errors';
 import * as packetUtils from './packet-utils';
 
 export class ModbusMaster {
-    constructor(serialPort, options) {
-        serialPort.on('error', (err) => {
-            console.error(err);
-        });
-
+    constructor(bodyCb, options) {
         this._options = Object.assign({}, {
             responseTimeout: RESPONSE_TIMEOUT,
             queueTimeout: QUEUE_TIMEOUT,
         }, options || {});
 
         this.logger = new Logger(this._options);
-        this.serial = SerialHelperFactory.create(serialPort, this._options);
+        this.serial = SerialHelperFactory.create(bodyCb, this._options);
     }
 
     /**
@@ -69,7 +65,8 @@ export class ModbusMaster {
                     `Retry ${retryCount + 1 - retry} of ${retryCount}`;
 
                 if (retry <= 0) {
-                    throw new ModbusRetryLimitExceed(funcId);
+                    // throw new ModbusRetryLimitExceed(funcId);
+                    return
                 }
 
                 this.logger.info(funcName + 'perform request.' + funcId);
@@ -146,11 +143,11 @@ export class ModbusMaster {
      */
     request(buffer) {
         return this.serial.write(packetUtils.addCrc(buffer))
-            .then((response) => {
-                if (!packetUtils.checkCrc(response)) {
-                    throw new ModbusCrcError();
-                }
-                return response;
-            });
+            // .then((response) => {
+            //     if (!packetUtils.checkCrc(response)) {
+            //         throw new ModbusCrcError();
+            //     }
+            //     return response;
+            // });
     }
 }
