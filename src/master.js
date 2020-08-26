@@ -55,35 +55,36 @@ export class ModbusMaster {
      */
     writeSingleRegister(slave, register, value, retryCount) {
         const packet = this.createFixedPacket(slave, FUNCTION_CODES.WRITE_SINGLE_REGISTER, register, value);
-        retryCount = retryCount || DEFAULT_RETRY_COUNT;
-
-        const performRequest = (retry) => {
-            return new Promise((resolve, reject) => {
-                const funcName = 'writeSingleRegister: ';
-                const funcId =
-                    `Slave ${slave}; Register: ${register}; Value: ${value};` +
-                    `Retry ${retryCount + 1 - retry} of ${retryCount}`;
-
-                if (retry <= 0) {
-                    // throw new ModbusRetryLimitExceed(funcId);
-                    return resolve();
-                }
-
-                this.logger.info(funcName + 'perform request.' + funcId);
-
-                this.request(packet)
-                    .then(resolve)
-                    .catch((err) => {
-                        this.logger.info(funcName + err + funcId);
-
-                        return performRequest(--retry)
-                            .then(resolve)
-                            .catch(reject);
-                    });
-            });
-        };
-
-        return performRequest(retryCount);
+        return packetUtils.addCrc(packet);
+        // retryCount = retryCount || DEFAULT_RETRY_COUNT;
+        //
+        // const performRequest = (retry) => {
+        //     return new Promise((resolve, reject) => {
+        //         const funcName = 'writeSingleRegister: ';
+        //         const funcId =
+        //             `Slave ${slave}; Register: ${register}; Value: ${value};` +
+        //             `Retry ${retryCount + 1 - retry} of ${retryCount}`;
+        //
+        //         if (retry <= 0) {
+        //             // throw new ModbusRetryLimitExceed(funcId);
+        //             return resolve();
+        //         }
+        //
+        //         this.logger.info(funcName + 'perform request.' + funcId);
+        //
+        //         this.request(packet)
+        //             .then(resolve)
+        //             .catch((err) => {
+        //                 this.logger.info(funcName + err + funcId);
+        //
+        //                 return performRequest(--retry)
+        //                     .then(resolve)
+        //                     .catch(reject);
+        //             });
+        //     });
+        // };
+        //
+        // return performRequest(retryCount);
     }
 
     /**
@@ -94,7 +95,9 @@ export class ModbusMaster {
      */
     writeMultipleRegisters(slave, start, array) {
         const packet = this.createVariousPacket(slave, FUNCTION_CODES.WRITE_MULTIPLE_REGISTERS, start, array);
-        return this.request(packet);
+        // console.log(packetUtils.addCrc(packet));
+        // return this.request(packet);
+        return packetUtils.addCrc(packet);
     }
 
     /**

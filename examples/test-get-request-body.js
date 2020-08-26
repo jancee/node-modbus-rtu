@@ -16,28 +16,14 @@ const ModbusMaster = require('../lib').ModbusMaster;
 const sleep = require('await-sleep');
 
 async function getDtuRequest() {
-    let result;
-    let master = new ModbusMaster({
-        requestBodyCb: (body) => {
-            // console.log(body);
-            result = body;
-        },
-        setOnDataListener: function (cb) {
-
-        },
-        removeOnDataListener: function (cb) {
-
-        },
-    });
-    master.writeMultipleRegisters(1, 40001, [15789]);
-    await sleep(0);
+    let master = new ModbusMaster();
+    let result = master.writeSingleRegister(1, 40001, 15789);
     console.log(result);
-    master = undefined;
     return result;
 }
 
 async function run() {
-    for (let i = 0; i < 10000000; i++) {
+    for (let i = 0; i < 1; i++) {
         await getDtuRequest();
     }
 
