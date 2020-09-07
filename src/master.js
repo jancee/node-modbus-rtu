@@ -15,6 +15,9 @@ import * as packetUtils from './packet-utils';
 
 export class ModbusMaster {
     constructor(bodyCb, options) {
+        if (!bodyCb && !options) {
+            return;
+        }
         this._options = Object.assign({}, {
             responseTimeout: RESPONSE_TIMEOUT,
             queueTimeout: QUEUE_TIMEOUT,
